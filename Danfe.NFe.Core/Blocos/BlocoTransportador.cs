@@ -19,18 +19,18 @@ namespace Danfe.NFe.Core.Blocos
 
             AdicionarLinhaCampos()
                 .ComCampo(Strings.RazaoSocial, transportadora.RazaoSocial)
-                .ComCampo("Frete", transportadora.ModalidadeFreteString, AlinhamentoHorizontal.Centro)
-                .ComCampo("Código ANTT", transportadora.CodigoAntt, AlinhamentoHorizontal.Centro)
-                .ComCampo("Placa do Veículo", transportadora.Placa, AlinhamentoHorizontal.Centro)
-                .ComCampo(Strings.UF, transportadora.VeiculoUf, AlinhamentoHorizontal.Centro)
-                .ComCampo(Strings.CnpjCpf, Formatador.FormatarCnpj(transportadora.CnpjCpf), AlinhamentoHorizontal.Centro)
+                .ComCampo("Frete", transportadora.ModalidadeFreteString)
+                .ComCampo("Código ANTT", transportadora.CodigoAntt)
+                .ComCampo("Placa do Veículo", transportadora.Placa)
+                .ComCampo(Strings.UF, transportadora.VeiculoUf)
+                .ComCampo(Strings.CnpjCpf, Formatador.FormatarCnpj(transportadora.CnpjCpf))
                 .ComLarguras(0, LarguraFrete, LarguraCampoCodigoAntt, LarguraCampoPlacaVeiculo, LarguraCampoUf, LarguraCampoCnpj);
 
             AdicionarLinhaCampos()
                 .ComCampo(Strings.Endereco, transportadora.EnderecoLogadrouro)
                 .ComCampo(Strings.Municipio, transportadora.Municipio)
-                .ComCampo(Strings.UF, transportadora.EnderecoUf, AlinhamentoHorizontal.Centro)
-                .ComCampo(Strings.InscricaoEstadual, transportadora.Ie, AlinhamentoHorizontal.Centro)
+                .ComCampo(Strings.UF, transportadora.EnderecoUf)
+                .ComCampo(Strings.InscricaoEstadual, transportadora.Ie)
                 .ComLarguras(0, LarguraCampoPlacaVeiculo + LarguraCampoCodigoAntt, LarguraCampoUf, LarguraCampoCnpj);
 
             var l = (float)(LarguraCampoCodigoAntt + LarguraCampoPlacaVeiculo + LarguraCampoUf + LarguraCampoCnpj) / 3F;

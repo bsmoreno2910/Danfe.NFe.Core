@@ -45,13 +45,13 @@ namespace Danfe.NFe.Core.Blocos
 
             AdicionarLinhaCampos()
                 .ComCampo("Natureza da operação", ViewModel.NaturezaOperacao)
-                .ComCampo("Protocolo de autorização", ViewModel.ProtocoloAutorizacao, AlinhamentoHorizontal.Centro)
+                .ComCampo("Protocolo de autorização", ViewModel.ProtocoloAutorizacao)
                 .ComLarguras(0, 46.5F);
 
             AdicionarLinhaCampos()
-                .ComCampo("Inscrição Estadual", ViewModel.Emitente.Ie, AlinhamentoHorizontal.Centro)
-                .ComCampo("Inscrição Estadual do Subst. Tributário", ViewModel.Emitente.IeSt, AlinhamentoHorizontal.Centro)
-                .ComCampo("Cnpj", Formatador.FormatarCnpj(ViewModel.Emitente.CnpjCpf), AlinhamentoHorizontal.Centro)
+                .ComCampo("Inscrição Estadual", ViewModel.Emitente.Ie)
+                .ComCampo("Inscrição Estadual do Subst. Tributário", ViewModel.Emitente.IeSt)
+                .ComCampo("Cnpj", Formatador.FormatarCnpj(ViewModel.Emitente.CnpjCpf))
                 .ComLargurasIguais();
 
         }

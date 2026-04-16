@@ -11,7 +11,7 @@ namespace Danfe.NFe.Core.Blocos
             var m = viewModel.CalculoIssqn;
 
             AdicionarLinhaCampos()
-                .ComCampo("INSCRIÇÃO MUNICIPAL", m.InscricaoMunicipal, AlinhamentoHorizontal.Centro)
+                .ComCampo("INSCRIÇÃO MUNICIPAL", m.InscricaoMunicipal)
                 .ComCampoNumerico("VALOR TOTAL DOS SERVIÇOS", m.ValorTotalServicos)
                 .ComCampoNumerico("BASE DE CÁLCULO DO ISSQN", m.BaseIssqn)
                 .ComCampoNumerico("VALOR TOTAL DO ISSQN", m.ValorIssqn)

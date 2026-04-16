@@ -40,7 +40,20 @@ namespace Danfe.NFe.Core.Graphics
         }
 
         /// <summary>
-        /// Desenha uma string dentro de um retângulo (em mm), aplicando alinhamento horizontal e vertical.
+        /// Ascent ratio da Times Type 1 usada pelo PDFClown (AFM ascent=683 / 1000em).
+        /// Ao posicionar a baseline em <c>y_top + Tamanho * 0.683</c> conseguimos que
+        /// o topo visual do caractere fique em <c>y_top</c>, idêntico ao comportamento
+        /// do PDFClown com <c>ShowText(y, YAlignment.Top)</c>.
+        /// </summary>
+        private const double PdfClownTimesAscentRatio = 0.683;
+
+        /// <summary>
+        /// Desenha uma string dentro de um retângulo (em mm), aplicando alinhamento
+        /// horizontal e vertical. O alinhamento horizontal é delegado ao PdfSharpCore
+        /// via <see cref="XStringFormat"/> — isso evita erros de centralização que
+        /// surgiriam ao medir a largura em um contexto separado (CreateMeasureContext)
+        /// e passá-la à <c>DrawString</c>, pois a fonte usada na medição pode
+        /// divergir sutilmente da fonte resolvida na página real.
         /// </summary>
         internal void DrawString(string str, RectangleF rect, Fonte fonte,
             AlinhamentoHorizontal ah = AlinhamentoHorizontal.Esquerda,
@@ -51,57 +64,71 @@ namespace Danfe.NFe.Core.Graphics
             if (fonte.Tamanho <= 0) throw new ArgumentOutOfRangeException(nameof(fonte));
             CheckRectangle(rect);
 
-            var p = rect.Location;
-
+            // Y: calculamos o "top" visual do texto baseado no alinhamento vertical.
+            float yTopMm;
             if (av == AlinhamentoVertical.Base)
-                p.Y = rect.Bottom - fonte.AlturaLinha;
+                yTopMm = rect.Bottom - fonte.AlturaLinha;
             else if (av == AlinhamentoVertical.Centro)
-                p.Y += (rect.Height - fonte.AlturaLinha) / 2F;
+                yTopMm = rect.Y + (rect.Height - fonte.AlturaLinha) / 2F;
+            else // Topo
+                yTopMm = rect.Y;
 
-            if (ah == AlinhamentoHorizontal.Direita)
-                p.X = rect.Right - fonte.MedirLarguraTexto(str);
-            else if (ah == AlinhamentoHorizontal.Centro)
-                p.X += (rect.Width - fonte.MedirLarguraTexto(str)) / 2F;
+            // X: âncora horizontal para o alinhamento.
+            //  - Esquerda: âncora = X esquerdo do rect; Alignment.Near
+            //  - Centro:   âncora = X central do rect;  Alignment.Center
+            //  - Direita:  âncora = X direito do rect;  Alignment.Far
+            double xAnchorPt;
+            XStringAlignment xAlign;
+            switch (ah)
+            {
+                case AlinhamentoHorizontal.Centro:
+                    xAnchorPt = (rect.X + rect.Width / 2F).ToPoint();
+                    xAlign = XStringAlignment.Center;
+                    break;
+                case AlinhamentoHorizontal.Direita:
+                    xAnchorPt = rect.Right.ToPoint();
+                    xAlign = XStringAlignment.Far;
+                    break;
+                default:
+                    xAnchorPt = rect.X.ToPoint();
+                    xAlign = XStringAlignment.Near;
+                    break;
+            }
 
-            ShowText(str, p, fonte);
+            // Baseline = topMm (em pt) + ascent em pontos (PDFClown-Times compat).
+            double baselinePt = yTopMm.ToPoint() + fonte.Tamanho * PdfClownTimesAscentRatio;
+
+            var fmt = new XStringFormat
+            {
+                Alignment = xAlign,
+                LineAlignment = XLineAlignment.BaseLine
+            };
+
+            XGraphics.DrawString(str, fonte.FonteInterna, TextBrush,
+                new XPoint(xAnchorPt, baselinePt),
+                fmt);
         }
-
-        /// <summary>
-        /// Formato de desenho usando BaseLine — damos controle direto sobre a posição
-        /// exata da baseline, evitando o offset extra que o PdfSharpCore injeta com
-        /// XStringFormats.TopLeft (que usa cyAscent incluindo LineGap ≈ 1.025em para
-        /// Times TTF, causando ~3pt de deslocamento abaixo do esperado pelo layout
-        /// original calibrado para PDFClown-Type1).
-        /// </summary>
-        private static readonly XStringFormat BaselineLeftFormat = new XStringFormat
-        {
-            Alignment = XStringAlignment.Near,
-            LineAlignment = XLineAlignment.BaseLine
-        };
-
-        /// <summary>
-        /// Ascent ratio da Times Type 1 usada pelo PDFClown (AFM ascent=683 / 1000em).
-        /// Ao posicionar a baseline em <c>y_top + Tamanho * 0.683</c> conseguimos que
-        /// o topo visual do caractere fique em <c>y_top</c>, idêntico ao comportamento
-        /// do PDFClown com <c>ShowText(y, YAlignment.Top)</c>.
-        /// </summary>
-        private const double PdfClownTimesAscentRatio = 0.683;
 
         /// <summary>
         /// Desenha a string tratando <paramref name="point"/> (mm) como top-left visual
         /// do texto — compatível com o layout original calibrado para PDFClown.
+        /// Uso interno (ex.: TextBlock que já calculou posições linha-a-linha).
         /// </summary>
         public void ShowText(string text, PointF point, Fonte fonte)
         {
             CheckPoint(point);
 
-            // Baseline = topLeft + ascent (PDFClown-Times-compatible).
-            double topLeftYpt = point.Y.ToPoint();
-            double baselinePt = topLeftYpt + fonte.Tamanho * PdfClownTimesAscentRatio;
+            double baselinePt = point.Y.ToPoint() + fonte.Tamanho * PdfClownTimesAscentRatio;
+
+            var fmt = new XStringFormat
+            {
+                Alignment = XStringAlignment.Near,
+                LineAlignment = XLineAlignment.BaseLine
+            };
 
             XGraphics.DrawString(text, fonte.FonteInterna, TextBrush,
                 new XPoint(point.X.ToPoint(), baselinePt),
-                BaselineLeftFormat);
+                fmt);
         }
 
         /// <summary>

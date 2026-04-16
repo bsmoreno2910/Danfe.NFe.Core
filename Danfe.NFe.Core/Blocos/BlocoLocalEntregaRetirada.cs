@@ -16,20 +16,20 @@ namespace Danfe.NFe.Core.Blocos
 
             AdicionarLinhaCampos()
             .ComCampo(Strings.NomeRazaoSocial, Model.NomeRazaoSocial)
-            .ComCampo(Strings.CnpjCpf, Formatador.FormatarCpfCnpj(Model.CnpjCpf), AlinhamentoHorizontal.Centro)
-            .ComCampo(Strings.InscricaoEstadual, Model.InscricaoEstadual, AlinhamentoHorizontal.Centro)
+            .ComCampo(Strings.CnpjCpf, Formatador.FormatarCpfCnpj(Model.CnpjCpf))
+            .ComCampo(Strings.InscricaoEstadual, Model.InscricaoEstadual)
             .ComLarguras(0, 45F * Proporcao, 30F * Proporcao);
 
             AdicionarLinhaCampos()
             .ComCampo(Strings.Endereco, Model.Endereco)
             .ComCampo(Strings.BairroDistrito, Model.Bairro)
-            .ComCampo(Strings.Cep, Formatador.FormatarCEP(Model.Cep), AlinhamentoHorizontal.Centro)
+            .ComCampo(Strings.Cep, Formatador.FormatarCEP(Model.Cep))
             .ComLarguras(0, 45F * Proporcao, 30F * Proporcao);
 
             AdicionarLinhaCampos()
             .ComCampo(Strings.Municipio, Model.Municipio)
-            .ComCampo(Strings.UF, Model.Uf, AlinhamentoHorizontal.Centro)
-            .ComCampo(Strings.FoneFax, Formatador.FormatarTelefone(Model.Telefone), AlinhamentoHorizontal.Centro)
+            .ComCampo(Strings.UF, Model.Uf)
+            .ComCampo(Strings.FoneFax, Formatador.FormatarTelefone(Model.Telefone))
             .ComLarguras(0, 7F * Proporcao, 30F * Proporcao);
         }
 
