@@ -255,13 +255,16 @@ namespace Danfe.NFe.Core.Graphics
         public IDisposable SaveState() => new GfxState(XGraphics);
 
         /// <summary>
-        /// Rotaciona em graus em torno do ponto (em mm).
+        /// Rotaciona o sistema de coordenadas em graus em torno de um ponto (em mm).
+        /// Delega para <see cref="XGraphics.RotateAtTransform"/> que aplica a sequência
+        /// correta de transformações (T · R · T⁻¹) respeitando a ordem Prepend interna
+        /// do PdfSharpCore. Compor Translate/Rotate/Translate manualmente não funciona
+        /// porque cada chamada é prepended, invertendo a ordem efetiva na CTM.
         /// </summary>
         public void RotateTransform(double angleDegrees, PointF centerMm)
         {
-            XGraphics.TranslateTransform(centerMm.X.ToPoint(), centerMm.Y.ToPoint());
-            XGraphics.RotateTransform(angleDegrees);
-            XGraphics.TranslateTransform(-centerMm.X.ToPoint(), -centerMm.Y.ToPoint());
+            XGraphics.RotateAtTransform(angleDegrees,
+                new XPoint(centerMm.X.ToPoint(), centerMm.Y.ToPoint()));
         }
 
         private void CheckRectangle(RectangleF r)

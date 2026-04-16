@@ -6,9 +6,9 @@
 
     <!-- Identidade do pacote -->
     <PackageId>Danfe.NFe.Core</PackageId>
-    <Version>2.0.0</Version>
-    <AssemblyVersion>2.0.0.0</AssemblyVersion>
-    <FileVersion>2.0.0.0</FileVersion>
+    <Version>2.0.1</Version>
+    <AssemblyVersion>2.0.1.0</AssemblyVersion>
+    <FileVersion>2.0.1.0</FileVersion>
 
     <!-- Metadata -->
     <Authors>Bruno Moreno (bsmoreno2910); Alexandre Laranjeiras (original); SilverCard (DanfeSharp)</Authors>
@@ -17,7 +17,7 @@
     <NeutralLanguage>pt-BR</NeutralLanguage>
     <Description>Gerador de DANFE NFe modelo 55 em PDF. Refatorado para PdfSharpCore, compatível com .NET Standard 2.0 e .NET 8. Fork/refactor de Zion.NFe.Danfe (Laranjeiras) / DanfeSharp (SilverCard).</Description>
     <PackageTags>danfe;nfe;nota-fiscal-eletronica;pdf;pdfsharpcore;brasil;fiscal</PackageTags>
-    <PackageReleaseNotes>v2.0.0 - Primeiro release pós-refactor: remoção do PDFClown (descontinuado), migração para PdfSharpCore 1.3.x (MIT), multi-target netstandard2.0 e net8.0, correções de alinhamento de texto para paridade visual com a versão original, rodapé personalizável, renomeação de namespace Zion.NFe.Danfe → Danfe.NFe.Core.</PackageReleaseNotes>
+    <PackageReleaseNotes>v2.0.1 - Correção do canhoto em landscape (margem esquerda vazia): rotação agora usa XGraphics.RotateAtTransform com pivot (X+W/2, Y+W/2) e ângulo -90, compatível com o sistema Y-down do PdfSharpCore. Canhotos rotacionados voltaram a aparecer na lateral esquerda do DANFE em modo paisagem.</PackageReleaseNotes>
 
     <!-- Links -->
     <PackageProjectUrl>https://github.com/bsmoreno2910/Danfe.NFe.Core</PackageProjectUrl>

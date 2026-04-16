@@ -85,12 +85,23 @@ namespace Danfe.NFe.Core
             {
                 canhoto.Width = RetanguloDesenhavel.Height;
 
-                // Em modo paisagem rotacionamos o canhoto 90°.
+                // Em paisagem, rotacionamos o canhoto 90° para ficar na lateral esquerda.
+                //
+                // A rotação leva o retângulo horizontal (X, Y, W, H) para um vertical
+                // (X, Y, H, W) no mesmo canto superior-esquerdo, com texto lendo de
+                // BAIXO para CIMA (quando a folha está em paisagem). Para isso, o
+                // pivot é (X + W/2, Y + W/2) e o ângulo é -90° no sistema Y-down do
+                // PdfSharpCore (que corresponde a uma rotação visual anti-horária).
+                //
+                // A fórmula antiga (pivot (0, W+X+Y) com +90) funcionava no PDFClown
+                // porque o sistema de coordenadas + composição de CTM eram diferentes.
+                var pivotX = canhoto.X + canhoto.Width / 2F;
+                var pivotY = canhoto.Y + canhoto.Width / 2F;
+                var pivot = new PointF(pivotX, pivotY);
+
                 using (Gfx.SaveState())
                 {
-                    // Origem da rotação: ponto correspondente ao canto do canhoto
-                    var origem = new PointF(0, canhoto.Width + canhoto.X + canhoto.Y);
-                    Gfx.RotateTransform(90, origem);
+                    Gfx.RotateTransform(-90, pivot);
 
                     for (int i = 0; i < Danfe.ViewModel.QuantidadeCanhotos; i++)
                     {
