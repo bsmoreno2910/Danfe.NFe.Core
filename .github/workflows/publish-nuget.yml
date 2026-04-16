@@ -17,6 +17,8 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # necessário para softprops/action-gh-release criar GitHub Release
 
     steps:
       - uses: actions/checkout@v4
