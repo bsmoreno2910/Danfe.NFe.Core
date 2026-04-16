@@ -67,15 +67,41 @@ namespace Danfe.NFe.Core.Graphics
         }
 
         /// <summary>
-        /// Desenha a string com top-left em <paramref name="point"/> (mm).
+        /// Formato de desenho usando BaseLine — damos controle direto sobre a posição
+        /// exata da baseline, evitando o offset extra que o PdfSharpCore injeta com
+        /// XStringFormats.TopLeft (que usa cyAscent incluindo LineGap ≈ 1.025em para
+        /// Times TTF, causando ~3pt de deslocamento abaixo do esperado pelo layout
+        /// original calibrado para PDFClown-Type1).
+        /// </summary>
+        private static readonly XStringFormat BaselineLeftFormat = new XStringFormat
+        {
+            Alignment = XStringAlignment.Near,
+            LineAlignment = XLineAlignment.BaseLine
+        };
+
+        /// <summary>
+        /// Ascent ratio da Times Type 1 usada pelo PDFClown (AFM ascent=683 / 1000em).
+        /// Ao posicionar a baseline em <c>y_top + Tamanho * 0.683</c> conseguimos que
+        /// o topo visual do caractere fique em <c>y_top</c>, idêntico ao comportamento
+        /// do PDFClown com <c>ShowText(y, YAlignment.Top)</c>.
+        /// </summary>
+        private const double PdfClownTimesAscentRatio = 0.683;
+
+        /// <summary>
+        /// Desenha a string tratando <paramref name="point"/> (mm) como top-left visual
+        /// do texto — compatível com o layout original calibrado para PDFClown.
         /// </summary>
         public void ShowText(string text, PointF point, Fonte fonte)
         {
             CheckPoint(point);
-            // XStringFormats.TopLeft garante que o ponto seja o canto superior esquerdo do texto.
+
+            // Baseline = topLeft + ascent (PDFClown-Times-compatible).
+            double topLeftYpt = point.Y.ToPoint();
+            double baselinePt = topLeftYpt + fonte.Tamanho * PdfClownTimesAscentRatio;
+
             XGraphics.DrawString(text, fonte.FonteInterna, TextBrush,
-                new XPoint(point.X.ToPoint(), point.Y.ToPoint()),
-                XStringFormats.TopLeft);
+                new XPoint(point.X.ToPoint(), baselinePt),
+                BaselineLeftFormat);
         }
 
         /// <summary>
