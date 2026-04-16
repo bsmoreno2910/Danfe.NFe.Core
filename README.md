@@ -1,4 +1,4 @@
-# Zion.NFe.Danfe (refactor PdfSharpCore / .NET Core)
+# Danfe.NFe.Core (refactor PdfSharpCore / .NET Core)
 
 Gerador de **DANFE NF-e modelo 55** em PDF.
 
@@ -23,14 +23,14 @@ Este repositório é uma continuação do trabalho original de
 ## Instalação
 
 ```bash
-dotnet add package Zion.NFe.Danfe
+dotnet add package Danfe.NFe.Core
 ```
 
 ## Exemplo de uso
 
 ```csharp
-using Zion.NFe.Danfe;
-using Zion.NFe.Danfe.Modelo;
+using Danfe.NFe.Core;
+using Danfe.NFe.Core.Modelo;
 
 // Cria o modelo a partir de um arquivo XML da NF-e.
 var modelo = DanfeViewModelCreator.CriarDeArquivoXml("nfe.xml");
@@ -44,7 +44,7 @@ var modelo2 = new DanfeViewModel()
     Emitente = new EmpresaViewModel()
     {
         CnpjCpf = "12345678000100",
-        RazaoSocial = "Zion.NFe.Danfe Ltda",
+        RazaoSocial = "Minha Empresa Ltda",
         // ...
     },
     // ...
@@ -89,9 +89,9 @@ using (var danfe = new DanfeDoc(modelo))
 
 | Projeto | Framework | Descrição |
 |---------|-----------|-----------|
-| `Zion.NFe.Danfe` | netstandard2.0 / net8.0 | Biblioteca principal. |
-| `Zion.NFe.Danfe.WebService` | net8.0 | API REST de exemplo (`POST /api/xml/pdf/gerar`). |
-| `Zion.NFe.Danfe_470_Test` | net8.0 | Testes MSTest. |
+| `Danfe.NFe.Core` | netstandard2.0 / net8.0 | Biblioteca principal. |
+| `Danfe.NFe.Core.WebService` | net8.0 | API REST de exemplo (`POST /api/xml/pdf/gerar`). |
+| `Danfe.NFe.Core.Tests` | net8.0 | Testes MSTest. |
 
 ## Font resolver (Linux / macOS / Docker)
 
@@ -123,4 +123,4 @@ dotnet test
 
 ## Licença
 
-MIT. Baseado no trabalho original do DanfeSharp / Zion.NFe.Danfe.
+MIT. Baseado no trabalho original do [DanfeSharp](https://github.com/SilverCard/DanfeSharp) / [Zion.NFe.Danfe](https://github.com/Laranjeiras/Zion.NFe.Danfe).
