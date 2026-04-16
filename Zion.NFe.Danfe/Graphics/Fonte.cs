@@ -1,29 +1,50 @@
-﻿using System;
+using System;
+using PdfSharpCore.Drawing;
+using PdfSharpCore.Pdf;
 using Zion.NFe.Danfe.Tools.Extensions;
-using pcf = org.pdfclown.documents.contents.fonts;
 
 namespace Zion.NFe.Danfe.Graphics
 {
     /// <summary>
-    /// Define uma fonte do PDF Clown e um tamanho. 
+    /// Define uma fonte (XFont do PdfSharpCore) e um tamanho em pontos.
+    /// A fonte é usada para desenho e medição. O tamanho aqui é o mesmo
+    /// passado ao XFont (em pontos), e as medidas de altura/largura são
+    /// convertidas de pontos para milímetros para uso interno pelo DANFE.
     /// </summary>
     internal class Fonte
     {
+        private static readonly XPdfFontOptions DefaultOptions = new XPdfFontOptions(PdfFontEncoding.Unicode);
+
         private float _Tamanho;
+        private XFont _FonteInterna;
 
         /// <summary>
-        /// Fonte do PDF Clown.
+        /// Família da fonte (ex: "Times New Roman").
         /// </summary>
-        public pcf.Font FonteInterna { get; private set; }
+        public string FamiliaFonte { get; private set; }
 
-        public Fonte(pcf.Font font, float tamanho)
+        /// <summary>
+        /// Estilo da fonte (Regular, Bold, Italic...).
+        /// </summary>
+        public XFontStyle EstiloFonte { get; private set; }
+
+        /// <summary>
+        /// XFont usado internamente pelo PdfSharpCore.
+        /// Recriado automaticamente quando <see cref="Tamanho"/> é alterado.
+        /// </summary>
+        public XFont FonteInterna => _FonteInterna;
+
+        public Fonte(string familia, XFontStyle estilo, float tamanho)
         {
-            FonteInterna = font ?? throw new ArgumentNullException(nameof(font));
+            if (string.IsNullOrWhiteSpace(familia)) throw new ArgumentNullException(nameof(familia));
+            FamiliaFonte = familia;
+            EstiloFonte = estilo;
             Tamanho = tamanho;
         }
 
         /// <summary>
-        /// Tamanho da fonte.
+        /// Tamanho da fonte em pontos. Quando alterado, o <see cref="FonteInterna"/>
+        /// é recriado — a API do XFont trata o size como imutável.
         /// </summary>
         public float Tamanho
         {
@@ -31,34 +52,48 @@ namespace Zion.NFe.Danfe.Graphics
             set
             {
                 if (value <= 0) throw new InvalidOperationException("O tamanho deve ser maior que zero.");
+                if (_Tamanho == value && _FonteInterna != null) return;
                 _Tamanho = value;
+                _FonteInterna = new XFont(FamiliaFonte, value, EstiloFonte, DefaultOptions);
             }
         }
 
         /// <summary>
         /// Mede a largura ocupada por uma string.
         /// </summary>
-        /// <param name="str">String</param>
-        /// <returns>Largura em mm.</returns>
+        /// <param name="str">String.</param>
+        /// <returns>Largura em milímetros.</returns>
         public float MedirLarguraTexto(string str)
         {
             if (string.IsNullOrEmpty(str)) return 0;
-            return (float)FonteInterna.GetWidth(str, Tamanho).ToMm();
+            double widthPt = FontMetrics.MeasureWidthPt(FonteInterna, str);
+            return (float)widthPt.ToMm();
         }
 
         /// <summary>
-        /// Mese a largura ocupada por um Char.
+        /// Mede a largura ocupada por um Char.
         /// </summary>
-        /// <param name="c">Char</param>
-        /// <returns>Largura em mm.</returns>
-        public float MedirLarguraChar(char c) => (float)FonteInterna.GetWidth(c, Tamanho).ToMm();
+        /// <param name="c">Char.</param>
+        /// <returns>Largura em milímetros.</returns>
+        public float MedirLarguraChar(char c)
+        {
+            double widthPt = FontMetrics.MeasureWidthPt(FonteInterna, c.ToString());
+            return (float)widthPt.ToMm();
+        }
 
         /// <summary>
-        /// Medida da altura da linha.
+        /// Altura da linha em milímetros, baseada nos metrics da fonte.
         /// </summary>
-        public float AlturaLinha => (float)FonteInterna.GetLineHeight(Tamanho).ToMm();
+        public float AlturaLinha
+        {
+            get
+            {
+                // GetHeight() retorna a altura da linha em pontos (unidade padrão do XGraphics).
+                double heightPt = FonteInterna.GetHeight();
+                return (float)heightPt.ToMm();
+            }
+        }
 
-        public Fonte Clonar() => new Fonte(FonteInterna, Tamanho);
-
+        public Fonte Clonar() => new Fonte(FamiliaFonte, EstiloFonte, Tamanho);
     }
 }

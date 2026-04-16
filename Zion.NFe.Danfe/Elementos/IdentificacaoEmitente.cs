@@ -1,5 +1,5 @@
-﻿using org.pdfclown.documents.contents.xObjects;
 using System.Drawing;
+using PdfSharpCore.Drawing;
 using Zion.NFe.Danfe.Enumeracoes;
 using Zion.NFe.Danfe.Graphics;
 using Zion.NFe.Danfe.Modelo;
@@ -10,7 +10,11 @@ namespace Zion.NFe.Danfe.Elementos
     internal class IdentificacaoEmitente : ElementoBase
     {
         public DanfeViewModel ViewModel { get; private set; }
-        public XObject Logo { get; set; }
+
+        /// <summary>
+        /// Logo como XImage (imagem raster ou primeira página de um PDF).
+        /// </summary>
+        public XImage Logo { get; set; }
 
         public IdentificacaoEmitente(Estilo estilo, DanfeViewModel viewModel) : base(estilo)
         {
@@ -23,9 +27,9 @@ namespace Zion.NFe.Danfe.Elementos
             base.Draw(gfx);
 
             // 7.7.6 Conteúdo do Quadro Dados do Emitente
-            // Deverá estar impresso em negrito.A razão social e/ ou nome fantasia deverá ter tamanho
-            // mínimo de doze(12) pontos, ou 17 CPP e os demais dados do emitente, endereço,
-            // município, CEP, fone / fax deverão ter tamanho mínimo de oito(8) pontos, ou 17 CPP.
+            // Deverá estar impresso em negrito. A razão social e/ou nome fantasia deverá ter tamanho
+            // mínimo de doze (12) pontos, ou 17 CPP e os demais dados do emitente, endereço,
+            // município, CEP, fone/fax deverão ter tamanho mínimo de oito (8) pontos, ou 17 CPP.
 
             var rp = BoundingBox.InflatedRetangle(0.75F);
             float alturaMaximaLogoHorizontal = 14F;
@@ -43,22 +47,25 @@ namespace Zion.NFe.Danfe.Elementos
             {
                 RectangleF rLogo;
 
-                //Logo Horizontal
-                if (Logo.Size.Width > Logo.Size.Height)
+                // Tamanho do logo em milímetros (XImage retorna pontos; convertemos).
+                float logoWMm = (float)Logo.PointWidth.ToMm();
+                float logoHMm = (float)Logo.PointHeight.ToMm();
+
+                // Logo Horizontal
+                if (logoWMm > logoHMm)
                 {
                     rLogo = new RectangleF(rp.X, rp.Y, rp.Width, alturaMaximaLogoHorizontal);
                     rp = rp.CutTop(alturaMaximaLogoHorizontal);
                 }
-                //Logo Vertical/Quadrado
+                // Logo Vertical/Quadrado
                 else
                 {
-                    float lw = rp.Height * Logo.Size.Width / Logo.Size.Height;
+                    float lw = rp.Height * logoWMm / logoHMm;
                     rLogo = new RectangleF(rp.X, rp.Y, lw, rp.Height);
                     rp = rp.CutLeft(lw);
                 }
 
                 gfx.ShowXObject(Logo, rLogo);
-
             }
 
             var emitente = ViewModel.Emitente;
@@ -78,8 +85,6 @@ namespace Zion.NFe.Danfe.Elementos
             ts.AlinhamentoHorizontal = AlinhamentoHorizontal.Centro;
             ts.AlinhamentoVertical = AlinhamentoVertical.Centro;
             ts.Draw(gfx);
-
-
         }
     }
 }

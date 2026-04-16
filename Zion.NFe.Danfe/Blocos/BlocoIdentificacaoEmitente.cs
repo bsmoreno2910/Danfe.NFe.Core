@@ -1,5 +1,5 @@
-﻿using org.pdfclown.documents.contents.xObjects;
-using System.Drawing;
+﻿using System.Drawing;
+using PdfSharpCore.Drawing;
 using Zion.NFe.Danfe.Elementos;
 using Zion.NFe.Danfe.Enumeracoes;
 using Zion.NFe.Danfe.Modelo;
@@ -56,7 +56,7 @@ namespace Zion.NFe.Danfe.Blocos
 
         }
 
-        public XObject Logo
+        public XImage Logo
         {
             get => idEmitente.Logo;
             set => idEmitente.Logo = value;

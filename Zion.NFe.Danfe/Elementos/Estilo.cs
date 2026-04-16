@@ -1,5 +1,5 @@
-﻿using Zion.NFe.Danfe.Graphics;
-using pcf = org.pdfclown.documents.contents.fonts;
+using PdfSharpCore.Drawing;
+using Zion.NFe.Danfe.Graphics;
 
 namespace Zion.NFe.Danfe.Elementos
 {
@@ -13,9 +13,10 @@ namespace Zion.NFe.Danfe.Elementos
         public float PaddingHorizontal { get; set; }
         public float FonteTamanhoMinimo { get; set; }
 
-        public pcf.Font FonteInternaRegular { get; set; }
-        public pcf.Font FonteInternaNegrito { get; set; }
-        public pcf.Font FonteInternaItalico { get; set; }
+        /// <summary>
+        /// Família de fonte (ex.: "Times New Roman").
+        /// </summary>
+        public string FamiliaFonte { get; set; }
 
         public Fonte FonteCampoCabecalho { get; private set; }
         public Fonte FonteCampoConteudo { get; private set; }
@@ -23,15 +24,13 @@ namespace Zion.NFe.Danfe.Elementos
         public Fonte FonteBlocoCabecalho { get; private set; }
         public Fonte FonteNumeroFolhas { get; private set; }
 
-        public Estilo(pcf.Font fontRegular, pcf.Font fontBold, pcf.Font fontItalic, float tamanhoFonteCampoCabecalho = 6, float tamanhoFonteConteudo = 10)
+        public Estilo(string familiaFonte, float tamanhoFonteCampoCabecalho = 6, float tamanhoFonteConteudo = 10)
         {
             PaddingHorizontal = 0.75F;
             PaddingSuperior = 0.65F;
             PaddingInferior = 0.3F;
 
-            FonteInternaRegular = fontRegular;
-            FonteInternaNegrito = fontBold;
-            FonteInternaItalico = fontItalic;
+            FamiliaFonte = familiaFonte;
 
             FonteCampoCabecalho = CriarFonteRegular(tamanhoFonteCampoCabecalho);
             FonteCampoConteudo = CriarFonteRegular(tamanhoFonteConteudo);
@@ -41,9 +40,8 @@ namespace Zion.NFe.Danfe.Elementos
             FonteTamanhoMinimo = 5.75F;
         }
 
-        public Fonte CriarFonteRegular(float emSize) => new Fonte(FonteInternaRegular, emSize);
-        public Fonte CriarFonteNegrito(float emSize) => new Fonte(FonteInternaNegrito, emSize);
-        public Fonte CriarFonteItalico(float emSize) => new Fonte(FonteInternaItalico, emSize);
-
+        public Fonte CriarFonteRegular(float emSize) => new Fonte(FamiliaFonte, XFontStyle.Regular, emSize);
+        public Fonte CriarFonteNegrito(float emSize) => new Fonte(FamiliaFonte, XFontStyle.Bold, emSize);
+        public Fonte CriarFonteItalico(float emSize) => new Fonte(FamiliaFonte, XFontStyle.Italic, emSize);
     }
 }

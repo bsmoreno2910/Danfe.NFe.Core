@@ -1,14 +1,14 @@
-﻿using System;
+using System;
 using System.Drawing;
+using PdfSharpCore.Drawing;
 using Zion.NFe.Danfe.Graphics;
-using Zion.NFe.Danfe.Tools.Extensions;
 
 namespace Zion.NFe.Danfe.Elementos
 {
     internal class LinhaTracejada : DrawableBase
     {
         public float Margin { get; set; }
-        public double[] DashPattern { get; set; }
+        public double[] DashPattern { get; set; } = new double[] { 3, 2 };
 
         public LinhaTracejada(float margin)
         {
@@ -19,14 +19,14 @@ namespace Zion.NFe.Danfe.Elementos
         {
             base.Draw(gfx);
 
-            gfx.PrimitiveComposer.BeginLocalState();
-            gfx.PrimitiveComposer.SetLineDash(new org.pdfclown.documents.contents.LineDash(new double[] { 3, 2 }));
-            gfx.PrimitiveComposer.DrawLine(new PointF(BoundingBox.Left, Y + Margin).ToPointMeasure(), new PointF(BoundingBox.Right, Y + Margin).ToPointMeasure());
-            gfx.PrimitiveComposer.Stroke();
-            gfx.PrimitiveComposer.End();
-
+            gfx.DrawDashedLine(
+                new PointF(BoundingBox.Left, Y + Margin),
+                new PointF(BoundingBox.Right, Y + Margin),
+                XColors.Black,
+                0.25F,
+                DashPattern);
         }
 
         public override float Height { get => 2 * Margin; set => throw new NotSupportedException(); }
-    }   
+    }
 }

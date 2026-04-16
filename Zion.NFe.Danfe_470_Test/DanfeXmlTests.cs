@@ -17,6 +17,7 @@ namespace Zion.NFe.Danfe_470_Test
                 Directory.CreateDirectory(OutputDirectory);
         }
 
+        [Ignore("Caminho hardcoded do autor original — habilite manualmente apontando para um XML local.")]
         [TestMethod]
         public void TestXml()
         {

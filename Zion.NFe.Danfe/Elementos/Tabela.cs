@@ -1,8 +1,8 @@
-﻿using org.pdfclown.documents.contents.colorSpaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using PdfSharpCore.Drawing;
 using Zion.NFe.Danfe.Enumeracoes;
 using Zion.NFe.Danfe.Graphics;
 using Zion.NFe.Danfe.Tools.Extensions;
@@ -166,12 +166,13 @@ namespace Zion.NFe.Danfe.Elementos
                 {
                     if (LinhaAtual > 0)
                     {
-                        gfx.PrimitiveComposer.BeginLocalState();
-                        gfx.PrimitiveComposer.SetStrokeColor(new DeviceRGBColor(0.5, 0.5, 0.5));
-                        gfx.PrimitiveComposer.SetLineDash(new org.pdfclown.documents.contents.LineDash(new double[] { 6, 1 }));
-                        gfx.PrimitiveComposer.DrawLine(new PointF(BoundingBox.Left, _DY1).ToPointMeasure(), new PointF(BoundingBox.Right, _DY1).ToPointMeasure());
-                        gfx.PrimitiveComposer.Stroke();
-                        gfx.PrimitiveComposer.End();
+                        // Linha separadora entre produtos: cinza 50% com traço 6/1.
+                        gfx.DrawDashedLine(
+                            new PointF(BoundingBox.Left, _DY1),
+                            new PointF(BoundingBox.Right, _DY1),
+                            XColor.FromArgb(128, 128, 128),
+                            0.25F,
+                            new double[] { 6, 1 });
                     }
 
                     LinhaAtual++;

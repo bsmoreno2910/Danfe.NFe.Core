@@ -1,11 +1,12 @@
-﻿using org.pdfclown.documents;
-using org.pdfclown.documents.contents.fonts;
-using org.pdfclown.files;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using PdfSharpCore.Drawing;
+using PdfSharpCore.Pdf;
 using Zion.NFe.Danfe.Blocos;
 using Zion.NFe.Danfe.Elementos;
 using Zion.NFe.Danfe.Enumeracoes;
+using Zion.NFe.Danfe.Graphics;
 using Zion.NFe.Danfe.Modelo;
 
 namespace Zion.NFe.Danfe
@@ -13,8 +14,11 @@ namespace Zion.NFe.Danfe
     public class DanfeDoc : IDisposable
     {
         public DanfeViewModel ViewModel { get; private set; }
-        public File File { get; private set; }
-        internal Document PdfDocument { get; private set; }
+
+        /// <summary>
+        /// Documento PDF (PdfSharpCore).
+        /// </summary>
+        public PdfDocument PdfDocument { get; private set; }
 
         internal BlocoCanhoto Canhoto { get; private set; }
         internal BlocoIdentificacaoEmitente IdentificacaoEmitente { get; private set; }
@@ -24,28 +28,32 @@ namespace Zion.NFe.Danfe
 
         internal List<DanfePagina> Paginas { get; private set; }
 
-        private StandardType1Font _FonteRegular;
-        private StandardType1Font _FonteNegrito;
-        private StandardType1Font _FonteItalico;
-        private StandardType1Font.FamilyEnum _FonteFamilia;
+        private readonly string _FonteFamilia;
+        private bool _FoiGerado;
 
-        private Boolean _FoiGerado;
+        /// <summary>
+        /// Imagem raster (JPG/PNG) do logo. Exclusivo com <see cref="_LogoPdfForm"/>.
+        /// </summary>
+        private XImage _LogoImage;
 
-        private org.pdfclown.documents.contents.xObjects.XObject _LogoObject = null;
+        /// <summary>
+        /// Logo em formato vetorial — primeira página de um PDF. Renderizado como XImage.
+        /// </summary>
+        private XImage _LogoPdfForm;
 
         public DanfeDoc(DanfeViewModel viewModel)
         {
             ViewModel = viewModel ?? throw new ArgumentNullException(nameof(viewModel));
 
+            // PdfSharpCore precisa de um FontResolver configurado para localizar
+            // fontes cross-platform (Linux/Mac). Idempotente: só roda uma vez.
+            DanfeFontResolverSetup.EnsureInitialized();
+
             _Blocos = new List<BlocoBase>();
-            File = new File();
-            PdfDocument = File.Document;
+            PdfDocument = new PdfDocument();
 
             // De acordo com o item 7.7, a fonte deve ser Times New Roman ou Courier New.
-            _FonteFamilia = StandardType1Font.FamilyEnum.Times;
-            _FonteRegular = new StandardType1Font(PdfDocument, _FonteFamilia, false, false);
-            _FonteNegrito = new StandardType1Font(PdfDocument, _FonteFamilia, true, false);
-            _FonteItalico = new StandardType1Font(PdfDocument, _FonteFamilia, false, true);
+            _FonteFamilia = "Times New Roman";
 
             EstiloPadrao = CriarEstilo();
 
@@ -75,65 +83,62 @@ namespace Zion.NFe.Danfe
             _FoiGerado = false;
         }
 
-        public void AdicionarLogoImagem(System.IO.Stream stream)
+        /// <summary>
+        /// Define a logo a partir de um stream de imagem raster (JPG/PNG).
+        /// </summary>
+        public void AdicionarLogoImagem(Stream stream)
         {
             if (stream == null) throw new ArgumentNullException(nameof(stream));
-
-            var img = org.pdfclown.documents.contents.entities.Image.Get(stream);
-            if (img == null) throw new InvalidOperationException("O logotipo não pode ser carregado, certifique-se que a imagem esteja no formato JPEG não progressivo.");
-            _LogoObject = img.ToXObject(PdfDocument);
+            // XImage.FromStream copia os dados; não precisamos manter o stream vivo.
+            _LogoImage = XImage.FromStream(() => stream);
         }
 
-        public void AdicionarLogoPdf(System.IO.Stream stream)
+        /// <summary>
+        /// Define a logo a partir da primeira página de um PDF (logo vetorial).
+        /// </summary>
+        public void AdicionarLogoPdf(Stream stream)
         {
             if (stream == null) throw new ArgumentNullException(nameof(stream));
-
-            using (var pdfFile = new org.pdfclown.files.File(new org.pdfclown.bytes.Stream(stream)))
-            {
-                _LogoObject = pdfFile.Document.Pages[0].ToXObject(PdfDocument);
-            }
+            // No PdfSharpCore, o próprio XImage sabe lidar com PDFs de 1 página via XPdfForm,
+            // mas a forma mais compatível é carregar via XImage.FromStream.
+            _LogoPdfForm = XImage.FromStream(() => stream);
         }
 
         public void AdicionarLogoImagem(string path)
         {
             if (string.IsNullOrWhiteSpace(path)) throw new ArgumentException(nameof(path));
-
-            using (var fs = new System.IO.FileStream(path, System.IO.FileMode.Open, System.IO.FileAccess.Read))
-            {
-                AdicionarLogoImagem(fs);
-            }
+            _LogoImage = XImage.FromFile(path);
         }
 
         public void AdicionarLogoPdf(string path)
         {
             if (string.IsNullOrWhiteSpace(path)) throw new ArgumentException(nameof(path));
-
-            using (var fs = new System.IO.FileStream(path, System.IO.FileMode.Open, System.IO.FileAccess.Read))
-            {
-                AdicionarLogoPdf(fs);
-            }
+            _LogoPdfForm = XImage.FromFile(path);
         }
 
         private void AdicionarMetadata()
         {
-            var info = PdfDocument.Information;
-            info[new org.pdfclown.objects.PdfName("ChaveAcesso")] = ViewModel.ChaveAcesso;
-            info[new org.pdfclown.objects.PdfName("TipoDocumento")] = "DANFE";
+            var info = PdfDocument.Info;
             info.CreationDate = DateTime.Now;
-            info.Creator = string.Format("{0} {1} - {2}", "Zion.Danfe", System.Reflection.Assembly.GetExecutingAssembly().GetName().Version, "https://github.com/Laranjeiras/Zion.Danfe");
+            info.Creator = string.Format("{0} {1} - {2}",
+                "Zion.NFe.Danfe",
+                System.Reflection.Assembly.GetExecutingAssembly().GetName().Version,
+                "https://github.com/bsmoreno2910/Zion.NFe.Danfe");
             info.Title = "DANFE (Documento auxiliar da NFe)";
+            info.Subject = $"DANFE - Chave: {ViewModel.ChaveAcesso}";
+            info.Keywords = "DANFE;NFE;ChaveAcesso=" + ViewModel.ChaveAcesso;
         }
 
         private Estilo CriarEstilo(float tFonteCampoCabecalho = 6, float tFonteCampoConteudo = 10)
         {
-            return new Estilo(_FonteRegular, _FonteNegrito, _FonteItalico, tFonteCampoCabecalho, tFonteCampoConteudo);
+            return new Estilo(_FonteFamilia, tFonteCampoCabecalho, tFonteCampoConteudo);
         }
 
         public void Gerar()
         {
             if (_FoiGerado) throw new InvalidOperationException("O Danfe já foi gerado.");
 
-            IdentificacaoEmitente.Logo = _LogoObject;
+            IdentificacaoEmitente.Logo = _LogoPdfForm ?? _LogoImage;
             var tabela = new TabelaProdutosServicos(ViewModel, EstiloPadrao);
 
             while (true)
@@ -144,16 +149,15 @@ namespace Zion.NFe.Danfe
                 tabela.SetSize(p.RetanguloCorpo.Size);
                 tabela.Draw(p.Gfx);
 
-                p.Gfx.Stroke();
-                p.Gfx.Flush();
+                // No PdfSharpCore cada página tem seu próprio XGraphics que precisa ser
+                // fechado (Dispose) para que o conteúdo seja gravado no PDF.
+                p.Dispose();
 
                 if (tabela.CompletamenteDesenhada) break;
-
             }
 
             PreencherNumeroFolhas();
             _FoiGerado = true;
-
         }
 
         private DanfePagina CriarPagina()
@@ -203,6 +207,7 @@ namespace Zion.NFe.Danfe
             int nFolhas = Paginas.Count;
             for (int i = 0; i < Paginas.Count; i++)
             {
+                // Precisamos reabrir o XGraphics da página para gravar o número.
                 Paginas[i].DesenhaNumeroPaginas(i + 1, nFolhas);
             }
         }
@@ -210,27 +215,34 @@ namespace Zion.NFe.Danfe
         public void Salvar(string path)
         {
             if (string.IsNullOrWhiteSpace(path)) throw new ArgumentException(nameof(path));
-
-            File.Save(path, SerializationModeEnum.Incremental);            
+            PdfDocument.Save(path);
         }
 
-        public void Salvar(System.IO.Stream stream)
+        public void Salvar(Stream stream)
         {
             if (stream == null) throw new ArgumentNullException(nameof(stream));
-
-            File.Save(new org.pdfclown.bytes.Stream(stream), SerializationModeEnum.Incremental);            
+            PdfDocument.Save(stream, false);
         }
 
-        public Byte[] ObterPdfBytes(System.IO.Stream stream)
+        /// <summary>
+        /// Retorna os bytes do PDF gerado.
+        /// </summary>
+        public byte[] ObterPdfBytes(Stream stream)
         {
             if (stream == null) throw new ArgumentNullException(nameof(stream));
-            var pdfStrean = new org.pdfclown.bytes.Stream(stream);
-            File.Save(pdfStrean, SerializationModeEnum.Incremental);
-            return pdfStrean.ToByteArray();
+            PdfDocument.Save(stream, false);
+            if (stream is MemoryStream ms) return ms.ToArray();
+
+            using (var tmp = new MemoryStream())
+            {
+                stream.Position = 0;
+                stream.CopyTo(tmp);
+                return tmp.ToArray();
+            }
         }
 
         #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
+        private bool disposedValue = false;
 
         protected virtual void Dispose(bool disposing)
         {
@@ -238,29 +250,18 @@ namespace Zion.NFe.Danfe
             {
                 if (disposing)
                 {
-                    File.Dispose();
+                    foreach (var p in Paginas) p.Dispose();
+                    PdfDocument?.Dispose();
+                    _LogoImage?.Dispose();
+                    _LogoPdfForm?.Dispose();
                 }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
-                // TODO: set large fields to null.
-
                 disposedValue = true;
             }
         }
 
-        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
-        // ~Danfe() {
-        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-        //   Dispose(false);
-        // }
-
-        // This code added to correctly implement the disposable pattern.
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
             Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
-            // GC.SuppressFinalize(this);
         }
         #endregion
     }

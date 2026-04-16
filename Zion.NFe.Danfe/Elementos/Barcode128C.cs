@@ -201,14 +201,13 @@ namespace Zion.NFe.Danfe.Elementos
                 {
                     if (i2 % 2 == 0)
                     {
-                        gfx.DrawRectangle(rect.X + x, rect.Y, w * pt[i2], rect.Height);
+                        // Módulo "preto" do código de barras — preencher retângulo.
+                        gfx.FillRectangle(rect.X + x, rect.Y, w * pt[i2], rect.Height);
                     }
 
                     x += w * pt[i2];
                 }
             }
-
-            gfx.Fill();
         }
 
         public override void Draw(Gfx gfx)

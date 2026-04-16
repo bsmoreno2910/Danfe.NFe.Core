@@ -1,14 +1,11 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using ZionDanfe.Enumeracoes;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Zion.NFe.Danfe;
+using Zion.NFe.Danfe.Enumeracoes;
 
-namespace ZionDanfe_470_Test
+namespace Zion.NFe.Danfe_470_Test
 {
     [TestClass]
     public class LogoTests
@@ -20,11 +17,11 @@ namespace ZionDanfe_470_Test
             if (!Directory.Exists(OutputDirectoryName)) Directory.CreateDirectory(OutputDirectoryName);
         }
 
-        public void TestLogo(String logoPath, [CallerMemberName] string pdfName = null)
+        public void TestLogo(string logoPath, [CallerMemberName] string pdfName = null)
         {
             var model = FabricaFake.DanfeViewModel_1();
             model.Orientacao = Orientacao.Retrato;
-            using (ZionDanfe.Danfe d = new ZionDanfe.Danfe(model))
+            using (var d = new DanfeDoc(model))
             {
                 if (logoPath.EndsWith(".pdf", StringComparison.InvariantCultureIgnoreCase))
                 {
@@ -41,7 +38,6 @@ namespace ZionDanfe_470_Test
                 d.Salvar(Path.Combine(OutputDirectoryName, pdfName + ".pdf"));
             }
         }
-
 
         [TestMethod]
         public void LogoQuadradoJPG() => TestLogo("Logos/JPG/Quadrado.jpg");
@@ -60,6 +56,5 @@ namespace ZionDanfe_470_Test
 
         [TestMethod]
         public void LogoVerticalPDF() => TestLogo("Logos/PDF/Vertical.pdf");
-
     }
 }

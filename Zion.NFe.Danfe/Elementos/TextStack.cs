@@ -48,7 +48,9 @@ namespace Zion.NFe.Danfe.Elementos
 
                 if (w > BoundingBox.Width)
                 {
-                    fonts[i] = new Fonte(_Fonts[i].FonteInterna, BoundingBox.Width * _Fonts[i].Tamanho / w);
+                    // Reduz proporcionalmente a fonte para caber na largura disponível.
+                    var novoTamanho = BoundingBox.Width * _Fonts[i].Tamanho / w;
+                    fonts[i] = new Fonte(_Fonts[i].FamiliaFonte, _Fonts[i].EstiloFonte, novoTamanho);
                 }
                 else
                 {
