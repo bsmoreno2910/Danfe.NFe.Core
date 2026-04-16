@@ -3,26 +3,52 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
-    <Authors>Bruno Moreno (bsmoreno2910); Alexandre Laranjeiras (original); SilverCard (DanfeSharp)</Authors>
-    <Company>Bruno Moreno</Company>
-    <Description>Gerador de DANFE NFe modelo 55 em PDF. Refatorado para PdfSharpCore, .NET Standard 2.0 e .NET 8. Fork/refactor de Zion.NFe.Danfe (Laranjeiras) / DanfeSharp (SilverCard).</Description>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Copyright>Copyright © 2026</Copyright>
-    <NeutralLanguage>pt-BR</NeutralLanguage>
-    <PackageProjectUrl>https://github.com/bsmoreno2910/Danfe.NFe.Core</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/bsmoreno2910/Danfe.NFe.Core</RepositoryUrl>
-    <RepositoryType>Git</RepositoryType>
-    <PackageTags>Danfe Nfe PDF NFe PdfSharpCore</PackageTags>
-    <PackageReleaseNotes>Refatorado para PdfSharpCore; suporte a .NET Standard 2.0 e .NET 8.</PackageReleaseNotes>
+
+    <!-- Identidade do pacote -->
+    <PackageId>Danfe.NFe.Core</PackageId>
+    <Version>2.0.0</Version>
     <AssemblyVersion>2.0.0.0</AssemblyVersion>
     <FileVersion>2.0.0.0</FileVersion>
-    <Version>2.0.0</Version>
+
+    <!-- Metadata -->
+    <Authors>Bruno Moreno (bsmoreno2910); Alexandre Laranjeiras (original); SilverCard (DanfeSharp)</Authors>
+    <Company>Bruno Moreno</Company>
+    <Copyright>Copyright © 2026 Bruno Moreno</Copyright>
+    <NeutralLanguage>pt-BR</NeutralLanguage>
+    <Description>Gerador de DANFE NFe modelo 55 em PDF. Refatorado para PdfSharpCore, compatível com .NET Standard 2.0 e .NET 8. Fork/refactor de Zion.NFe.Danfe (Laranjeiras) / DanfeSharp (SilverCard).</Description>
+    <PackageTags>danfe;nfe;nota-fiscal-eletronica;pdf;pdfsharpcore;brasil;fiscal</PackageTags>
+    <PackageReleaseNotes>v2.0.0 - Primeiro release pós-refactor: remoção do PDFClown (descontinuado), migração para PdfSharpCore 1.3.x (MIT), multi-target netstandard2.0 e net8.0, correções de alinhamento de texto para paridade visual com a versão original, rodapé personalizável, renomeação de namespace Zion.NFe.Danfe → Danfe.NFe.Core.</PackageReleaseNotes>
+
+    <!-- Links -->
+    <PackageProjectUrl>https://github.com/bsmoreno2910/Danfe.NFe.Core</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/bsmoreno2910/Danfe.NFe.Core</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+
+    <!-- Licença -->
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+
+    <!-- README embarcado (aparece na página do pacote no nuget.org) -->
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <!-- Build -->
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+
+    <!-- Symbols para debug dos consumidores (snupkg = NuGet.org padrão) -->
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
     <OutputType>Library</OutputType>
-    <PackageId>Danfe.NFe.Core</PackageId>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="PdfSharpCore" Version="1.3.65" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- README do repo é empacotado na raiz do .nupkg -->
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>
