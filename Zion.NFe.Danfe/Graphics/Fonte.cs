@@ -82,17 +82,24 @@ namespace Zion.NFe.Danfe.Graphics
         }
 
         /// <summary>
-        /// Altura da linha em milímetros, baseada nos metrics da fonte.
+        /// Altura da linha em milímetros.
+        /// <para>
+        /// O layout do DANFE (blocos "DANFE / Nº / Série", canhoto, créditos etc.)
+        /// foi calibrado no DanfeSharp/Zion.NFe.Danfe original para a Times Type 1
+        /// do PDFClown, cuja altura de linha é exatamente <c>Size * 0.9</c>
+        /// (AFM: ascent 683 + descent 217 = 900 por 1000 de unitsPerEm).
+        /// </para>
+        /// <para>
+        /// A Times New Roman TTF do Windows tem métricas mais generosas
+        /// (ascent 1825 + descent 443 + lineGap 87 = 2355 de 2048 ≈ 1.15em via
+        /// <see cref="XFont.GetHeight()"/>, ou 1.107em sem o lineGap). Usar esse
+        /// valor quebra layouts apertados — linhas sobrepõem-se no bloco "Nº / Série".
+        /// </para>
+        /// <para>
+        /// Mantemos <c>0.9em</c> para preservar o layout original pixel-perfect.
+        /// </para>
         /// </summary>
-        public float AlturaLinha
-        {
-            get
-            {
-                // GetHeight() retorna a altura da linha em pontos (unidade padrão do XGraphics).
-                double heightPt = FonteInterna.GetHeight();
-                return (float)heightPt.ToMm();
-            }
-        }
+        public float AlturaLinha => (float)(Tamanho * 0.9).ToMm();
 
         public Fonte Clonar() => new Fonte(FamiliaFonte, EstiloFonte, Tamanho);
     }
