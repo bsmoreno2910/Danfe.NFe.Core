@@ -14,11 +14,11 @@ namespace Danfe.NFe.Core.Blocos
                 .ComCampo("INSCRIÇÃO MUNICIPAL", m.InscricaoMunicipal)
                 .ComCampoNumerico("VALOR TOTAL DOS SERVIÇOS", m.ValorTotalServicos)
                 .ComCampoNumerico("BASE DE CÁLCULO DO ISSQN", m.BaseIssqn)
-                .ComCampoNumerico("VALOR TOTAL DO ISSQN", m.ValorIssqn)
+                .ComCampoNumerico("VALOR DO ISSQN", m.ValorIssqn)
                 .ComLargurasIguais();
         }
 
-        public override PosicaoBloco Posicao => PosicaoBloco.Base;
+        public override PosicaoBloco Posicao => PosicaoBloco.Topo;
         public override string Cabecalho => "CÁLCULO DO ISSQN";
     }
 }

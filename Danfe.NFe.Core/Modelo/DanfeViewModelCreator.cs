@@ -179,8 +179,84 @@ namespace Danfe.NFe.Core.Modelo
                 ValorTotalNota = i.vNF,
                 vFCPUFDest = i.vFCPUFDest,
                 vICMSUFDest = i.vICMSUFDest,
-                vICMSUFRemet = i.vICMSUFRemet
+                vICMSUFRemet = i.vICMSUFRemet,
+                ValorFcp = i.vFCP,
+                ValorFcpSt = i.vFCPST,
+                BaseCalculoIcmsMono = i.qBCMono,
+                ValorIcmsMono = i.vICMSMono,
+                BaseCalculoIcmsMonoReten = i.qBCMonoReten,
+                ValorIcmsMonoReten = i.vICMSMonoReten
             };
+        }
+
+        internal static void PreencherTotaisReformaTributaria(CalculoImpostoViewModel m, Total total)
+        {
+            if (total == null) return;
+
+            m.ValorImpostoSeletivo = total.ISTot?.vIS;
+
+            var t = total.IBSCBSTot;
+            if (t == null) return;
+
+            m.ValorIbsUf = t.gIBS?.gIBSUF?.vIBSUF;
+            m.ValorIbsMun = t.gIBS?.gIBSMun?.vIBSMun;
+            m.ValorCbs = t.gCBS?.vCBS;
+            m.ValorIbsMono = t.gMono?.vIBSMono;
+            m.ValorCbsMono = t.gMono?.vCBSMono;
+            m.ValorIbsMonoReten = t.gMono?.vIBSMonoReten;
+            m.ValorCbsMonoReten = t.gMono?.vCBSMonoReten;
+        }
+
+        /// <summary>
+        /// Regra de impressão das alíquotas (NT 2026.010, item 4.3): quando o grupo gRed é informado,
+        /// imprime-se a alíquota efetiva (pAliqEfet); caso contrário, a alíquota vigente.
+        /// </summary>
+        internal static double? AliquotaImpressa(double? aliquotaVigente, GrupoReducaoAliquota gRed)
+        {
+            return gRed != null ? gRed.pAliqEfet : aliquotaVigente;
+        }
+
+        internal static void PreencherReformaTributaria(ProdutoViewModel produto, ProdutoImposto imposto)
+        {
+            var ibscbs = imposto.IBSCBS;
+
+            if (ibscbs != null)
+            {
+                produto.ClassificacaoTributaria = ibscbs.cClassTrib;
+
+                var g = ibscbs.gIBSCBS;
+                if (g != null)
+                {
+                    produto.BaseIbsCbs = g.vBC;
+
+                    if (g.gIBSUF != null)
+                    {
+                        produto.AliquotaIbsUf = AliquotaImpressa(g.gIBSUF.pIBSUF, g.gIBSUF.gRed);
+                        produto.ValorIbsUf = g.gIBSUF.vIBSUF;
+                    }
+
+                    if (g.gIBSMun != null)
+                    {
+                        produto.AliquotaIbsMun = AliquotaImpressa(g.gIBSMun.pIBSMun, g.gIBSMun.gRed);
+                        produto.ValorIbsMun = g.gIBSMun.vIBSMun;
+                    }
+
+                    if (g.gCBS != null)
+                    {
+                        produto.AliquotaCbs = AliquotaImpressa(g.gCBS.pCBS, g.gCBS.gRed);
+                        produto.ValorCbs = g.gCBS.vCBS;
+                    }
+                }
+            }
+
+            var impostoSeletivo = imposto.IS;
+
+            if (impostoSeletivo != null)
+            {
+                produto.BaseIs = impostoSeletivo.vBCIS;
+                produto.AliquotaIs = impostoSeletivo.pIS;
+                produto.ValorIs = impostoSeletivo.vIS;
+            }
         }
 
         public static DanfeViewModel CreateFromXml(ProcNFe procNfe)
@@ -269,8 +345,11 @@ namespace Danfe.NFe.Core.Modelo
                         {
                             produto.ValorIpi = ipi.vIPI;
                             produto.AliquotaIpi = ipi.pIPI;
+                            produto.BaseIpi = ipi.vBC;
                         }
                     }
+
+                    PreencherReformaTributaria(produto, imposto);
                 }
 
                 model.Produtos.Add(produto);
@@ -288,6 +367,11 @@ namespace Danfe.NFe.Core.Modelo
             }
 
             model.CalculoImposto = CriarCalculoImpostoViewModel(infNfe.total.ICMSTot);
+            PreencherTotaisReformaTributaria(model.CalculoImposto, infNfe.total);
+
+            var qrCode = nfe.infNFeSupl?.qrCode;
+            if (!string.IsNullOrWhiteSpace(qrCode))
+                model.QrCode = qrCode.Trim();
 
             var issqnTotal = infNfe.total.ISSQNtot;
 

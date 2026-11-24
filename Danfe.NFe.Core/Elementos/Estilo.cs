@@ -14,6 +14,11 @@ namespace Danfe.NFe.Core.Elementos
         public float FonteTamanhoMinimo { get; set; }
 
         /// <summary>
+        /// Altura, em milímetros, das linhas de campos que usam este estilo.
+        /// </summary>
+        public float AlturaCampo { get; set; } = Constantes.CampoAltura;
+
+        /// <summary>
         /// Família de fonte (ex.: "Times New Roman").
         /// </summary>
         public string FamiliaFonte { get; set; }

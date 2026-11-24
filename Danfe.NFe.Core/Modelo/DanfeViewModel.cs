@@ -176,6 +176,12 @@ namespace Danfe.NFe.Core.Modelo
         /// </summary>
         public List<string> NotasFiscaisReferenciadas { get; set; }
 
+        /// <summary>
+        /// <para>Texto do QR Code da NF-e. Quando informado, o quadro "QR Code" é exibido ao lado dos Dados Adicionais (NT 2026.010, item 4.5).</para>
+        /// <para>Tag qrCode (ZX02)</para>
+        /// </summary>
+        public string QrCode { get; set; }
+
         #region Local Retirada e Entrega
 
         public LocalEntregaRetiradaViewModel LocalRetirada { get; set; }
@@ -207,13 +213,16 @@ namespace Danfe.NFe.Core.Modelo
         #region Opções de exibição
 
         /// <summary>
-        /// Exibi os valores do ICMS Interestadual e Valor Total dos Impostos no bloco Cálculos do Imposto.
+        /// Permite exibir os campos "Valor do DIFAL na UF de destino" e "Valor do FCP na UF de destino"
+        /// no bloco "Total do ICMS / IPI". Mesmo quando verdadeiro, os campos só são exibidos quando
+        /// a informação existe no XML (NT 2026.010, item 4.4).
         /// </summary>
         public bool ExibirIcmsInterestadual { get; set; } = true;
 
         /// <summary>
-        /// Exibi os valores do PIS e COFINS no bloco Cálculos do Imposto.
+        /// Sem efeito: o leiaute da NT 2026.010 não possui campos de PIS e COFINS no bloco de totais.
         /// </summary>
+        [Obsolete("O leiaute do DANFE da NT 2026.010 não exibe PIS/COFINS nos totais. Esta opção não tem mais efeito.")]
         public bool ExibirPisConfins { get; set; } = true;
 
         /// <summary>

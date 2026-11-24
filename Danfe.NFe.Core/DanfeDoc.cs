@@ -28,6 +28,11 @@ namespace Danfe.NFe.Core
 
         internal List<DanfePagina> Paginas { get; private set; }
 
+        /// <summary>
+        /// Altura mínima, em mm, do corpo da página para desenhar o quadro de produtos.
+        /// </summary>
+        private const float AlturaMinimaCorpo = 20F;
+
         private readonly string _FonteFamilia;
         private bool _FoiGerado;
 
@@ -60,23 +65,35 @@ namespace Danfe.NFe.Core
             Paginas = new List<DanfePagina>();
             Canhoto = CriarBloco<BlocoCanhoto>();
             IdentificacaoEmitente = AdicionarBloco<BlocoIdentificacaoEmitente>();
-            AdicionarBloco<BlocoDestinatarioRemetente>();
+
+            // Leiaute da NT 2026.010 (DANFE Reforma Tributária). Em paisagem a altura útil é menor,
+            // por isso as linhas de campos são mais baixas, como no modelo de referência horizontal.
+            bool paisagem = ViewModel.Orientacao == Orientacao.Paisagem;
+            var estiloCampos = paisagem ? CriarEstiloCompacto() : EstiloPadrao;
+            var estiloTotais = paisagem ? estiloCampos : CriarEstilo(5F);
+
+            AdicionarBloco<BlocoDestinatarioRemetente>(estiloCampos);
 
             if (ViewModel.LocalRetirada != null && ViewModel.ExibirBlocoLocalRetirada)
-                AdicionarBloco<BlocoLocalRetirada>();
+                AdicionarBloco<BlocoLocalRetirada>(estiloCampos);
 
             if (ViewModel.LocalEntrega != null && ViewModel.ExibirBlocoLocalEntrega)
-                AdicionarBloco<BlocoLocalEntrega>();
+                AdicionarBloco<BlocoLocalEntrega>(estiloCampos);
 
             if (ViewModel.Duplicatas.Count > 0)
                 AdicionarBloco<BlocoDuplicataFatura>();
 
-            AdicionarBloco<BlocoCalculoImposto>(ViewModel.Orientacao == Orientacao.Paisagem ? EstiloPadrao : CriarEstilo(4.75F));
-            AdicionarBloco<BlocoTransportador>();
-            AdicionarBloco<BlocoDadosAdicionais>(CriarEstilo(tFonteCampoConteudo: 8));
+            AdicionarBloco<BlocoTotalNota>(estiloTotais);
+            AdicionarBloco<BlocoTotalIcmsIpi>(estiloTotais);
+            AdicionarBloco<BlocoTotalIbsCbsIs>(estiloTotais);
 
             if (ViewModel.CalculoIssqn.Mostrar)
-                AdicionarBloco<BlocoCalculoIssqn>();
+                AdicionarBloco<BlocoCalculoIssqn>(estiloCampos);
+
+            if (ViewModel.Transportadora.PossuiDados)
+                AdicionarBloco<BlocoTransportador>(estiloCampos);
+
+            AdicionarBloco<BlocoDadosAdicionais>(CriarEstilo(tFonteCampoConteudo: 8));
 
             AdicionarMetadata();
 
@@ -134,6 +151,11 @@ namespace Danfe.NFe.Core
             return new Estilo(_FonteFamilia, tFonteCampoCabecalho, tFonteCampoConteudo);
         }
 
+        private Estilo CriarEstiloCompacto()
+        {
+            return new Estilo(_FonteFamilia, 5F, 8F) { AlturaCampo = 5.4F };
+        }
+
         public void Gerar()
         {
             if (_FoiGerado) throw new InvalidOperationException("O Danfe já foi gerado.");
@@ -145,9 +167,15 @@ namespace Danfe.NFe.Core
             {
                 DanfePagina p = CriarPagina();
 
-                tabela.SetPosition(p.RetanguloCorpo.Location);
-                tabela.SetSize(p.RetanguloCorpo.Size);
-                tabela.Draw(p.Gfx);
+                // Na 1ª página os blocos podem ocupar quase toda a folha; nesse caso os itens começam na 2ª.
+                if (p.RetanguloCorpo.Height >= AlturaMinimaCorpo || Paginas.Count > 1)
+                {
+                    // A partir da 2ª página o corpo tem a altura máxima; se o item não couber, não caberá em nenhuma.
+                    tabela.Tabela.ForcarPrimeiraLinha = Paginas.Count > 1;
+                    tabela.SetPosition(p.RetanguloCorpo.Location);
+                    tabela.SetSize(p.RetanguloCorpo.Size);
+                    tabela.Draw(p.Gfx);
+                }
 
                 // No PdfSharpCore cada página tem seu próprio XGraphics que precisa ser
                 // fechado (Dispose) para que o conteúdo seja gravado no PDF.
@@ -167,7 +195,7 @@ namespace Danfe.NFe.Core
             p.DesenharBlocos(Paginas.Count == 1);
             p.DesenharCreditos();
 
-            if (ViewModel.TipoAmbiente == 2)
+            if (ViewModel.TipoAmbiente == 2 && p.RetanguloCorpo.Height >= AlturaMinimaCorpo)
                 p.DesenharAvisoHomologacao();
 
             return p;

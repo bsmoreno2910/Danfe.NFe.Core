@@ -63,7 +63,21 @@ namespace Danfe.NFe.Core.Tests
                 ValorTotalProdutos = v,
                 vFCPUFDest = v,
                 vICMSUFDest = v,
-                vICMSUFRemet = v
+                vICMSUFRemet = v,
+                ValorFcp = v,
+                ValorFcpSt = v,
+                BaseCalculoIcmsMono = v,
+                ValorIcmsMono = v,
+                BaseCalculoIcmsMonoReten = v,
+                ValorIcmsMonoReten = v,
+                ValorCbs = v,
+                ValorIbsUf = v,
+                ValorIbsMun = v,
+                ValorImpostoSeletivo = v,
+                ValorIbsMono = v,
+                ValorCbsMono = v,
+                ValorIbsMonoReten = v,
+                ValorCbsMonoReten = v
             };
         }
 
@@ -173,7 +187,15 @@ namespace Danfe.NFe.Core.Tests
                     Quantidade = i * Math.PI * 10,
                     AliquotaIcms = 99.88,
                     Unidade = "PEC",
-                    Ncm = new String('8', 8)
+                    Ncm = new String('8', 8),
+                    ClassificacaoTributaria = "000001",
+                    BaseIbsCbs = v,
+                    AliquotaIbsUf = 0.1,
+                    ValorIbsUf = v * 0.001,
+                    AliquotaIbsMun = 0,
+                    ValorIbsMun = 0,
+                    AliquotaCbs = 0.9,
+                    ValorCbs = v * 0.009
                 };
 
                 if (i % 10 == 0)

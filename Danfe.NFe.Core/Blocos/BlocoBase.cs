@@ -43,11 +43,25 @@ namespace Danfe.NFe.Core.Blocos
             }
         }
 
+        /// <summary>
+        /// Indica se algum dos valores foi informado e é diferente de zero. Usado para os
+        /// campos de exibição condicionada (NT 2026.010, item 4.4).
+        /// </summary>
+        protected static bool AlgumValorInformado(params double?[] valores)
+        {
+            foreach (var v in valores)
+            {
+                if (v.HasValue && v.Value != 0) return true;
+            }
+
+            return false;
+        }
+
         public LinhaCampos AdicionarLinhaCampos()
         {
             var l = new LinhaCampos(Estilo, Width);
             l.Width = Width;
-            l.Height = Constantes.CampoAltura;
+            l.Height = Estilo.AlturaCampo;
             MainVerticalStack.Add(l);
             return l;
         }

@@ -94,10 +94,83 @@
         public double? AliquotaIpi { get; set; }
 
         /// <summary>
+        /// <para>Valor da BC do IPI</para>
+        /// <para>Tag vBC (grupo IPITrib)</para>
+        /// </summary>
+        public double? BaseIpi { get; set; }
+
+        /// <summary>
         /// <para>Valor aproximado total de tributos federais, estaduais e municipais. [NT2013.003]</para>
         /// <para>Tag vTotTrib</para>
         /// </summary>
         public double? ValorAproximadoTributos { get; set; }
+
+        #region Reforma Tributária - IBS / CBS / IS (NT 2026.010, item 4.3)
+
+        /// <summary>
+        /// <para>Código de Classificação Tributária do IBS e da CBS</para>
+        /// <para>Tag cClassTrib (UB14)</para>
+        /// </summary>
+        public string ClassificacaoTributaria { get; set; }
+
+        /// <summary>
+        /// <para>Base de cálculo do IBS e da CBS</para>
+        /// <para>Tag vBC (UB16)</para>
+        /// </summary>
+        public double? BaseIbsCbs { get; set; }
+
+        /// <summary>
+        /// <para>Alíquota do IBS da UF a ser impressa: pAliqEfet (UB28) quando informado o grupo gRed, senão pIBSUF (UB18).</para>
+        /// </summary>
+        public double? AliquotaIbsUf { get; set; }
+
+        /// <summary>
+        /// <para>Valor do IBS da UF</para>
+        /// <para>Tag vIBSUF (UB35)</para>
+        /// </summary>
+        public double? ValorIbsUf { get; set; }
+
+        /// <summary>
+        /// <para>Alíquota do IBS do Município a ser impressa: pAliqEfet (UB47) quando informado o grupo gRed, senão pIBSMun (UB37).</para>
+        /// </summary>
+        public double? AliquotaIbsMun { get; set; }
+
+        /// <summary>
+        /// <para>Valor do IBS do Município</para>
+        /// <para>Tag vIBSMun (UB54)</para>
+        /// </summary>
+        public double? ValorIbsMun { get; set; }
+
+        /// <summary>
+        /// <para>Alíquota da CBS a ser impressa: pAliqEfet (UB66) quando informado o grupo gRed, senão pCBS (UB56).</para>
+        /// </summary>
+        public double? AliquotaCbs { get; set; }
+
+        /// <summary>
+        /// <para>Valor da CBS</para>
+        /// <para>Tag vCBS (UB67)</para>
+        /// </summary>
+        public double? ValorCbs { get; set; }
+
+        /// <summary>
+        /// <para>Base de cálculo do Imposto Seletivo</para>
+        /// <para>Tag vBCIS (UB05)</para>
+        /// </summary>
+        public double? BaseIs { get; set; }
+
+        /// <summary>
+        /// <para>Alíquota do Imposto Seletivo</para>
+        /// <para>Tag pIS (UB06)</para>
+        /// </summary>
+        public double? AliquotaIs { get; set; }
+
+        /// <summary>
+        /// <para>Valor do Imposto Seletivo</para>
+        /// <para>Tag vIS (UB11)</para>
+        /// </summary>
+        public double? ValorIs { get; set; }
+
+        #endregion
 
         public ProdutoViewModel()
         {

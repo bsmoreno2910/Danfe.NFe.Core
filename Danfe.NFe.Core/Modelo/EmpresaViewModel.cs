@@ -96,9 +96,30 @@ namespace Danfe.NFe.Core.Modelo
         public string Email { get; set; }
 
         /// <summary>
-        /// Código de Regime Tributário
+        /// <para>Código de Regime Tributário</para>
+        /// <para>Tag CRT (C21)</para>
         /// </summary>
         public string CRT { get; set; }
+
+        /// <summary>
+        /// Código de Regime Tributário acompanhado da sua descrição, ex.: "3 - REGIME NORMAL".
+        /// </summary>
+        public string CrtDescricao
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(CRT)) return string.Empty;
+
+                switch (CRT.Trim())
+                {
+                    case "1": return "1 - SIMPLES NACIONAL";
+                    case "2": return "2 - SIMPLES NACIONAL - EXCESSO DE SUBLIMITE DE RECEITA BRUTA";
+                    case "3": return "3 - REGIME NORMAL";
+                    case "4": return "4 - SIMPLES NACIONAL - MEI";
+                    default: return CRT.Trim();
+                }
+            }
+        }
 
         /// <summary>
         /// Linha 1 do Endereço

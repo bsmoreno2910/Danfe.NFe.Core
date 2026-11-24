@@ -50,10 +50,16 @@ namespace Danfe.NFe.Core.Blocos
 
             AdicionarLinhaCampos()
                 .ComCampo("Inscrição Estadual", ViewModel.Emitente.Ie)
-                .ComCampo("Inscrição Estadual do Subst. Tributário", ViewModel.Emitente.IeSt)
-                .ComCampo("Cnpj", Formatador.FormatarCnpj(ViewModel.Emitente.CnpjCpf))
+                .ComCampo("Inscrição Estadual do Substituto Tributário", ViewModel.Emitente.IeSt)
+                .ComCampo(Strings.CnpjCpf, Formatador.FormatarCpfCnpj(ViewModel.Emitente.CnpjCpf))
                 .ComLargurasIguais();
 
+            // NT 2026.010, item 4.2. O Tipo de Regime de Apuração do IBS e da CBS é um campo
+            // reservado: não há tag publicada, portanto nenhum conteúdo é impresso.
+            AdicionarLinhaCampos()
+                .ComCampo("Código do Regime Tributário", ViewModel.Emitente.CrtDescricao)
+                .ComCampo("Tipo de Regime de Apuração do IBS e da CBS", null)
+                .ComLargurasIguais();
         }
 
         public XImage Logo
