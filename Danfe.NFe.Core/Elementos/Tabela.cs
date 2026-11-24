@@ -12,13 +12,18 @@ namespace Danfe.NFe.Core.Elementos
     internal class Tabela : ElementoBase
     {
         public List<TabelaColuna> Colunas { get; private set; }
-        public List<List<string>> Linhas { get; private set; }
+        public List<CelulaTabela[]> Linhas { get; private set; }
         public float PaddingSuperior { get; private set; }
         public float PaddingInferior { get; private set; }
         public float PaddingHorizontal { get; private set; }
 
         public int LinhaAtual { get; private set; }
-        public float TamanhoFonteCabecalho { get; private set; }
+
+        /// <summary>
+        /// Quando verdadeiro, a primeira linha da página é desenhada mesmo que não caiba, para que
+        /// um item mais alto que a página não impeça o término da geração do DANFE.
+        /// </summary>
+        public bool ForcarPrimeiraLinha { get; set; }
 
         private float _DY;
         private float _DY1;
@@ -29,9 +34,8 @@ namespace Danfe.NFe.Core.Elementos
         public Tabela(Estilo estilo) : base(estilo)
         {
             Colunas = new List<TabelaColuna>();
-            Linhas = new List<List<string>>();
+            Linhas = new List<CelulaTabela[]>();
             LinhaAtual = 0;
-            TamanhoFonteCabecalho = 6;
 
             PaddingHorizontal = 0.6F;
             PaddingSuperior = 0.75F;
@@ -41,7 +45,7 @@ namespace Danfe.NFe.Core.Elementos
             // Deverá ter tamanho mínimo de seis(6) pontos, ou 17 CPP.
 
             FonteCorpo = estilo.CriarFonteRegular(6F);
-            FonteCabecalho = estilo.CriarFonteRegular(6F);
+            FonteCabecalho = estilo.CriarFonteNegrito(5.5F);
         }
 
         public Tabela ComColuna(float larguraP, AlinhamentoHorizontal ah, params string[] cabecalho)
@@ -53,7 +57,21 @@ namespace Danfe.NFe.Core.Elementos
         public void AdicionarLinha(List<string> linha)
         {
             if (linha.Count != Colunas.Count) throw new ArgumentException(nameof(linha));
-            Linhas.Add(linha);
+
+            var celulas = new CelulaTabela[linha.Count];
+            for (int i = 0; i < linha.Count; i++)
+            {
+                if (!string.IsNullOrWhiteSpace(linha[i]))
+                    celulas[i] = new CelulaTexto(linha[i], FonteCorpo, Colunas[i].AlinhamentoHorizontal);
+            }
+
+            Linhas.Add(celulas);
+        }
+
+        public void AdicionarLinha(params CelulaTabela[] celulas)
+        {
+            if (celulas.Length != Colunas.Count) throw new ArgumentException(nameof(celulas));
+            Linhas.Add(celulas);
         }
 
         public void AjustarLarguraColunas()
@@ -69,43 +87,32 @@ namespace Danfe.NFe.Core.Elementos
 
         }
 
-        private Boolean DesenharLinha(Gfx gfx)
+        private Boolean DesenharLinha(Gfx gfx, bool forcar)
         {
-            float x = X;
             _DY1 = _DY;
 
-            TextBlock[] tb = new TextBlock[Colunas.Count];
+            var celulas = Linhas[LinhaAtual];
+            var larguras = new float[Colunas.Count];
+            float tbm = 0;
 
             for (int i = 0; i < Colunas.Count; i++)
             {
-                var c = Colunas[i];
-                var v = Linhas[LinhaAtual][i];
+                larguras[i] = (Width * Colunas[i].PorcentagemLargura) / 100F - 2F * PaddingHorizontal;
 
-                float w = (Width * c.PorcentagemLargura) / 100F;
-
-                if (!string.IsNullOrWhiteSpace(v))
-                {
-
-                    tb[i] = new TextBlock(v, FonteCorpo)
-                    {
-                        Width = w - 2F * Estilo.PaddingHorizontal,
-                        X = x + PaddingHorizontal,
-                        Y = _DY + PaddingSuperior,
-                        AlinhamentoHorizontal = c.AlinhamentoHorizontal
-                    };
-                }
-
-                x += w;
-
+                if (celulas[i] != null)
+                    tbm = Math.Max(tbm, celulas[i].CalcularAltura(larguras[i]));
             }
 
-            var tbm = tb.Where(t => t != null).Max(t => t.Height);
-            if (tbm + _DY + PaddingInferior + PaddingSuperior > BoundingBox.Bottom) return false;
+            if (!forcar && tbm + _DY + PaddingInferior + PaddingSuperior > BoundingBox.Bottom) return false;
+
+            float x = X;
 
             for (int i = 0; i < Colunas.Count; i++)
             {
-                if (tb[i] != null)
-                    tb[i].Draw(gfx);
+                if (celulas[i] != null)
+                    celulas[i].Desenhar(gfx, x + PaddingHorizontal, _DY + PaddingSuperior, larguras[i]);
+
+                x += (Width * Colunas[i].PorcentagemLargura) / 100F;
             }
 
             _DY += Math.Max(tbm, FonteCorpo.AlturaLinha) + PaddingSuperior + PaddingInferior;
@@ -157,14 +164,15 @@ namespace Danfe.NFe.Core.Elementos
 
             DesenharCabecalho(gfx);
 
+            int linhasNestaPagina = 0;
 
             while (LinhaAtual < Linhas.Count)
             {
-                Boolean r = DesenharLinha(gfx);
+                Boolean r = DesenharLinha(gfx, ForcarPrimeiraLinha && linhasNestaPagina == 0);
 
                 if (r)
                 {
-                    if (LinhaAtual > 0)
+                    if (LinhaAtual > 0 && linhasNestaPagina > 0)
                     {
                         // Linha separadora entre produtos: cinza 50% com traço 6/1.
                         gfx.DrawDashedLine(
@@ -176,22 +184,14 @@ namespace Danfe.NFe.Core.Elementos
                     }
 
                     LinhaAtual++;
+                    linhasNestaPagina++;
                 }
                 else
                 {
                     break;
                 }
             }
-
-
-
-
-
-
-
         }
-
-
 
         public override bool PossuiContono => false;
     }

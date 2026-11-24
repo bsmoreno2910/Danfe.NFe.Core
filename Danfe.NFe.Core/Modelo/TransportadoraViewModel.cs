@@ -75,6 +75,25 @@ namespace Danfe.NFe.Core.Modelo
         /// </summary>
         public Double? PesoBruto { get; set; }
 
+        /// <summary>
+        /// Indica se há dados de transporte/volumes a apresentar no DANFE (NT 2026.010, item 4.4).
+        /// </summary>
+        public bool PossuiDados =>
+            ModalidadeFrete != 9
+            || !string.IsNullOrWhiteSpace(RazaoSocial)
+            || !string.IsNullOrWhiteSpace(CnpjCpf)
+            || !string.IsNullOrWhiteSpace(Ie)
+            || !string.IsNullOrWhiteSpace(EnderecoLogadrouro)
+            || !string.IsNullOrWhiteSpace(Municipio)
+            || !string.IsNullOrWhiteSpace(CodigoAntt)
+            || !string.IsNullOrWhiteSpace(Placa)
+            || !string.IsNullOrWhiteSpace(Especie)
+            || !string.IsNullOrWhiteSpace(Marca)
+            || !string.IsNullOrWhiteSpace(Numeracao)
+            || QuantidadeVolumes.HasValue
+            || PesoBruto.HasValue
+            || PesoLiquido.HasValue;
+
         public string ModalidadeFreteString
         {
             get

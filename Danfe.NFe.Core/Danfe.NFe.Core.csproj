@@ -6,9 +6,9 @@
 
     <!-- Identidade do pacote -->
     <PackageId>Danfe.NFe.Core</PackageId>
-    <Version>2.0.1</Version>
-    <AssemblyVersion>2.0.1.0</AssemblyVersion>
-    <FileVersion>2.0.1.0</FileVersion>
+    <Version>3.0.0</Version>
+    <AssemblyVersion>3.0.0.0</AssemblyVersion>
+    <FileVersion>3.0.0.0</FileVersion>
 
     <!-- Metadata -->
     <Authors>Bruno Moreno (bsmoreno2910); Alexandre Laranjeiras (original); SilverCard (DanfeSharp)</Authors>
@@ -17,7 +17,7 @@
     <NeutralLanguage>pt-BR</NeutralLanguage>
     <Description>Gerador de DANFE NFe modelo 55 em PDF. Refatorado para PdfSharpCore, compatível com .NET Standard 2.0 e .NET 8. Fork/refactor de Zion.NFe.Danfe (Laranjeiras) / DanfeSharp (SilverCard).</Description>
     <PackageTags>danfe;nfe;nota-fiscal-eletronica;pdf;pdfsharpcore;brasil;fiscal</PackageTags>
-    <PackageReleaseNotes>v2.0.1 - Correção do canhoto em landscape (margem esquerda vazia): rotação agora usa XGraphics.RotateAtTransform com pivot (X+W/2, Y+W/2) e ângulo -90, compatível com o sistema Y-down do PdfSharpCore. Canhotos rotacionados voltaram a aparecer na lateral esquerda do DANFE em modo paisagem.</PackageReleaseNotes>
+    <PackageReleaseNotes>v3.0.0 - Leiaute do DANFE conforme a NT 2026.010 (Reforma Tributária: IBS, CBS e IS): novo bloco "Total do IBS / CBS / IS"; totais divididos em "Total dos Produtos e Total da Nota" e "Total do ICMS / IPI" com campos condicionados (FCP, DIFAL, ICMS monofásico); CRT e Tipo de Regime de Apuração do IBS/CBS no quadro do emitente; novo quadro de produtos com cClassTrib, bases, alíquotas (efetivas quando há gRed) e valores de ICMS, IBS UF, IBS Município, CBS, IS e IPI; quadro de QR Code quando o XML possui infNFeSupl/qrCode; ISSQN e Transportador exibidos somente quando aplicáveis.</PackageReleaseNotes>
 
     <!-- Links -->
     <PackageProjectUrl>https://github.com/bsmoreno2910/Danfe.NFe.Core</PackageProjectUrl>
@@ -44,6 +44,7 @@
 
   <ItemGroup>
     <PackageReference Include="PdfSharpCore" Version="1.3.65" />
+    <PackageReference Include="QRCoder" Version="1.6.0" />
   </ItemGroup>
 
   <ItemGroup>

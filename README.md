@@ -7,7 +7,30 @@ Este repositório é uma continuação do trabalho original de
 — que por sua vez é um fork do
 [SilverCard/DanfeSharp](https://github.com/SilverCard/DanfeSharp).
 
-## O que mudou nessa versão (2.0)
+## Versão 3.0 — NT 2026.010 (DANFE Reforma Tributária)
+
+O leiaute segue a [Nota Técnica 2026.010](https://www.nfe.fazenda.gov.br/) (IBS, CBS e IS),
+nas orientações retrato e paisagem:
+
+- **Quadro do emitente:** novos campos *Código do Regime Tributário* (CRT) e
+  *Tipo de Regime de Apuração do IBS e da CBS* (campo reservado, impresso vazio
+  até a publicação da tag).
+- **Totais:** blocos *Total dos Produtos e Total da Nota*, *Total do ICMS / IPI*
+  e o novo *Total do IBS / CBS / IS* (`vCBS`, `vIBSUF`, `vIBSMun`, `vIS` e
+  monofasia `gMono`).
+- **Campos condicionados (item 4.4):** as linhas de FCP/DIFAL, ICMS monofásico
+  e IBS/CBS monofásicos só aparecem quando o XML traz algum valor diferente de zero.
+  O Transportador e o ISSQN só aparecem quando há dados.
+- **Dados dos Produtos/Serviços:** colunas *CST / CFOP*, *QTD / UN*, *VLR UNIT*,
+  *VLR TOTAL*, *Bases de Cálculo*, *Alíquotas* e *Valor dos Tributos* (ICMS,
+  IBS UF, IBS Município, CBS, IS e IPI), mais NCM e `cClassTrib` na descrição.
+  Quando o grupo `gRed` é informado, a alíquota impressa é a efetiva (`pAliqEfet`).
+- **QR Code (item 4.5):** quando o XML possui `infNFeSupl/qrCode`, o quadro
+  *QR Code* é desenhado ao lado dos Dados Adicionais.
+
+A opção `ExibirPisConfins` ficou obsoleta: o novo leiaute não tem PIS/COFINS nos totais.
+
+## O que mudou na versão 2.0
 
 - Removida a dependência do **PDFClown.NET 2.0.0** (biblioteca descontinuada
   e incompatível com .NET Core/8).

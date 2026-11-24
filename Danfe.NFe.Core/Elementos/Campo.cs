@@ -24,7 +24,7 @@ namespace Danfe.NFe.Core.Elementos
             this.Conteudo = conteudo;
             AlinhamentoHorizontalConteudo = alinhamentoHorizontalConteudo;
             IsConteudoNegrito = true;
-            Height = Constantes.CampoAltura;
+            Height = estilo.AlturaCampo;
         }
 
         protected virtual void DesenharCabecalho(Gfx gfx)

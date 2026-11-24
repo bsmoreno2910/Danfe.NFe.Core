@@ -54,6 +54,9 @@
     <None Update="Xml\NFe\v4.00\v4_ComLocalRetirada.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Xml\NFe\v4.00\v4_ReformaTributaria.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

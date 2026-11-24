@@ -19,7 +19,7 @@ namespace Danfe.NFe.Core.Blocos
 
             AdicionarLinhaCampos()
                 .ComCampo(Strings.RazaoSocial, transportadora.RazaoSocial)
-                .ComCampo("Frete", transportadora.ModalidadeFreteString)
+                .ComCampo("Frete por conta", transportadora.ModalidadeFreteString)
                 .ComCampo("Código ANTT", transportadora.CodigoAntt)
                 .ComCampo("Placa do Veículo", transportadora.Placa)
                 .ComCampo(Strings.UF, transportadora.VeiculoUf)
